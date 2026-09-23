@@ -419,66 +419,123 @@
             </div>
         </div>
         <script>
-            let cart= [];
-            const cartCountEl = document.getElementById('cart-count');
-            const cartButtons = document.querySelectorAll('.btn-card');
-            const cartLink = document.getElementById('cart-link');
-            const cartDrawer = document.getElementById('cart-drawer');
-            const closeCart= document.getElementById('close-cart');
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartTotalEl = document.getElementById('cart-total');
+  document.addEventListener('DOMContentLoaded', () => {
+    let cart = [];
+    const cartCountEl = document.getElementById('cart-count');
+    const cartButtons = document.querySelectorAll('.btn-card');
+    const cartLink = document.getElementById('cart-link');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const closeCart = document.getElementById('close-cart');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotalEl = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const contactMessageInput = document.querySelector('textarea[name="message"]');
 
-            if(cartLink) {
-                cartLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    cartDrawer.classList.add('open');
-                });
-            }
-            if(closeCart) {
-                closeCart.addEventListener('click', () => {
-                    cartDrawer.classList.remove('open');
-                });
-            }
-            cartButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const card = button.closest('menu-card');
-                    const title = card.querySelector('h3').innerText;
-                    const priceString = card.querySelector('.price').innerText;
-                    const price = parseFloat(priceString.replace('$', ''));
+    if (cartLink) {
+      cartLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (cartDrawer) {
+          cartDrawer.classList.add('open');
+        }
+      });
+    }
+    if (closeCart) {
+      closeCart.addEventListener('click', () => {
+        if (cartDrawer) {
+          cartDrawer.classList.remove('open');
+        }
+      });
+    }
 
-                    cart.push({ title, price });
-                    updateCartUI();
+    cartButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const card = button.closest('.menu-card');
+        if (!card) return;
+        
+        const titleEl = card.querySelector('h3');
+        const priceEl = card.querySelector('.price');
+        
+        if (!titleEl || !priceEl) return;
 
-                    const.originalText = button.innerText;
-                    button.innerText = "Added!";
-                    setTimeout(() => {
-                        button.innerText = originalText;
-                    }, 1200);
-                });
-            });
-            function updateCartUI() {
-                if(cartCountEl) cartCountEl.innerText = cart.length;
+        const title = titleEl.innerText;
+        const priceString = priceEl.innerText;
+        const price = parseFloat(priceString.replace('$', ''));
 
-                if(cart.length === 0) {
-                    cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
-                    if(cartTotalEl) cartTotalEl.innerText = '$0.00';
-                    return;
-                }
-                let total = 0;
-                cartItemsContainer.innerHTML = '';
+        cart.push({ title, price });
+        updateCartUI();
 
-                cart.forEach((item) => {
-                    total += item.price;
-                    const itemEl = document.createElement('div');
-                    itemEl.classList.add('cart-item');
-                    itemEl.innerHTML = '
-                        <span>${item.title}</span>
-                        <span>$${item.price.toFixed(2)}</span>
-                    ';
-                    cartItemsContainer.appendChild(itemEl);
-                 });
-                 if(cartTotalEl) cartTotalEl.innerText = '$${total.toFixed(2)}';
-            }
+        const originalText = button.innerText;
+        button.innerText = "Added! ✓";
+        setTimeout(() => {
+          button.innerText = originalText;
+        }, 1200);
+      });
+    });
+
+    function updateCartUI() {
+      if (cartCountEl) {
+        cartCountEl.innerText = cart.length;
+      }
+      
+      if (!cartItemsContainer) return;
+
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+        if (cartTotalEl) cartTotalEl.innerText = '$0.00';
+        return;
+      }
+
+      let total = 0;
+      cartItemsContainer.innerHTML = '';
+      
+      cart.forEach((item) => {
+        total += item.price;
+        const itemEl = document.createElement('div');
+        itemEl.classList.add('cart-item');
+        itemEl.innerHTML = `
+          <span>${item.title}</span>
+          <span>$${item.price.toFixed(2)}</span>
+        `;
+        cartItemsContainer.appendChild(itemEl);
+      });
+
+      if (cartTotalEl) {
+        cartTotalEl.innerText = `$${total.toFixed(2)}`;
+      }
+    }
+    
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (cart.length === 0) {
+          alert('Your cart is empty!');
+          return;
+        }
+
+        let orderSummary = "Hello! I would like to place an order for:\n\n";
+        cart.forEach(item => {
+          orderSummary += `• ${item.title} - $${item.price.toFixed(2)}\n`;
+        });
+        
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        orderSummary += `\nTotal: $${total.toFixed(2)}`;
+
+        if (contactMessageInput) {
+          contactMessageInput.value = orderSummary;
+        }
+
+        if (cartDrawer) {
+          cartDrawer.classList.remove('open');
+        }
+
+        const contactSection = document.getElementById('contact');
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+  });
         </script>
             
     </body>
